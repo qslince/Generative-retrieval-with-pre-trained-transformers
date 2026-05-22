@@ -37,8 +37,11 @@ includes the expanded coursework notebook set from `plum_sid_coursework`.
 |   +-- meta.json.gz                # Compressed item metadata
 |   `-- sequential_data.txt         # User interaction sequences
 +-- notebooks/
-|   +-- original/                  # Four notebooks from the upstream repo
-|   `-- coursework/                # Expanded coursework notebook pipeline
+|   `-- coursework/                # Coursework notebook pipeline
+|       +-- 00_baseline/           # Data preparation and baseline notebooks
+|       +-- 01_sid_generation/     # RQ-VAE/SID generation notebooks
+|       +-- 02_recsys/             # GPT2Rec training/evaluation notebooks
+|       `-- 03_analysis/           # Experiment analysis notebooks
 +-- src/
 |   `-- sid_utils.py               # Reusable SID assignment/metric helpers
 +-- docs/                          # Protocol, metric guide, file map, plan
@@ -110,58 +113,32 @@ The training notebooks currently refer to `heterodata_object12_updated.pt` in
 their original Kaggle/local paths. When running locally, either update
 `DATA_PATH` to point at `data/heterodata_object.pt` if that artifact is suitable
 for your run, or regenerate the updated artifact from
-`notebooks/original/data_prep_diff_emb.ipynb` or
-`notebooks/coursework/00_baseline/data_prep_diff_emb.ipynb` and place it where
-the training notebooks expect it.
+`notebooks/coursework/00_baseline/data_prep_diff_emb.ipynb` or
+`notebooks/coursework/00_baseline/data_prep_diff_emb_upstream.ipynb` and place
+it where the training notebooks expect it.
 
-## Notebook Collections
+## Notebook Workflow
 
-There are two notebook collections:
-
-- `notebooks/original/`: the four notebooks from the upstream repository,
-  preserved as the compact original workflow.
-- `notebooks/coursework/`: the expanded coursework workflow copied from
-  `plum_sid_coursework`, grouped into baseline preparation, SID generation,
-  RecSys training, and analysis.
-
-The original workflow is:
-
-1. `notebooks/original/data_prep_diff_emb.ipynb`
-   - Loads the sequential data, metadata, and id maps.
-   - Builds item-side representations and a heterogeneous data object.
-   - Saves a prepared `.pt` artifact for model training.
-
-2. `notebooks/original/RQVAE_train_stage.ipynb`
-   - Trains the main RQ-VAE semantic-id model.
-   - Saves checkpoints named like `rqvae_improved_s{session}.pt`.
-
-3. `notebooks/original/RQVAE_AntiContrastive_train.ipynb`
-   - Trains the anti-contrastive RQ-VAE variant.
-   - Saves checkpoints named like `rqvae_anti_s{session}.pt`.
-
-4. `notebooks/original/GPT2_Rec_Analysis.ipynb`
-   - Loads trained RQ-VAE checkpoints.
-   - Assigns semantic ids to items.
-   - Trains/evaluates a GPT-style sequential recommendation model.
-   - Saves GPT recommendation checkpoints and plots when configured.
-
-The expanded coursework workflow is:
+All notebooks are kept under `notebooks/coursework/` so the repository has a
+single submission-oriented notebook layout. The tree combines the upstream
+notebooks and the expanded coursework experiments without splitting them into
+separate `original` and `coursework` collections.
 
 1. `notebooks/coursework/00_baseline/`
-   - Data preparation and original PLUM/RQ-VAE/GPT2 baselines.
+   - Data preparation and PLUM/RQ-VAE/GPT2 baseline notebooks.
+   - Includes the upstream data-preparation notebook as
+     `data_prep_diff_emb_upstream.ipynb`.
 2. `notebooks/coursework/01_sid_generation/`
    - Improved RQ-VAE training, 3-level/4-level SID variants, longitudinal
      checkpoints, and collision disambiguation notebooks.
+   - Includes the upstream RQ-VAE training notebooks as
+     `RQVAE_train_stage_upstream.ipynb` and
+     `RQVAE_AntiContrastive_train_upstream.ipynb`.
 3. `notebooks/coursework/02_recsys/`
    - GPT2Rec training and evaluation over generated SID variants.
 4. `notebooks/coursework/03_analysis/`
    - Tie-break analysis, multi-seed summaries, Spearman correlations, and
      final report tables.
-
-`notebooks/original/GPT2_Rec_Analysis.ipynb` is identical to
-`notebooks/coursework/00_baseline/plum_original_GPT2_analysis.ipynb`; both are
-kept so the original repository workflow and coursework workflow remain
-traceable.
 
 ## Results Summary
 
@@ -254,7 +231,7 @@ checks after edits, validate that the notebooks are readable JSON and that the
 documented dependency list still matches notebook imports.
 
 ```bash
-jupyter nbconvert --to notebook --execute notebooks/original/RQVAE_train_stage.ipynb --ExecutePreprocessor.cwd=.
+jupyter nbconvert --to notebook --execute notebooks/coursework/01_sid_generation/RQVAE_train_stage_upstream.ipynb --ExecutePreprocessor.cwd=.
 ```
 
 The command above executes a full notebook and may be slow or require a GPU and

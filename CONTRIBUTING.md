@@ -13,8 +13,7 @@ easy to review.
 
 ## Working With Notebooks
 
-- Keep original upstream notebooks in `notebooks/original/`.
-- Keep expanded coursework notebooks in `notebooks/coursework/`.
+- Keep notebooks in the single coursework tree under `notebooks/coursework/`.
 - Run Jupyter from the repository root.
 - Keep exploratory changes in clearly named cells.
 - Avoid committing generated checkpoints, plots, or temporary outputs.

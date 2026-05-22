@@ -7,21 +7,12 @@ This map reflects the merged repository layout.
 - `src/sid_utils.py`: reusable SID assignment, collision handling, SID metrics,
   and Spearman helper functions.
 
-## Original Upstream Notebooks
-
-- `notebooks/original/data_prep_diff_emb.ipynb`: data preparation workflow from
-  the upstream repository.
-- `notebooks/original/RQVAE_train_stage.ipynb`: main RQ-VAE training workflow.
-- `notebooks/original/RQVAE_AntiContrastive_train.ipynb`: anti-contrastive
-  RQ-VAE variant.
-- `notebooks/original/GPT2_Rec_Analysis.ipynb`: GPT2Rec analysis notebook.
-
 ## Coursework Notebooks
 
 - `notebooks/coursework/00_baseline/`: data preparation and original PLUM/RQ-VAE
-  baselines.
+  baselines, including `data_prep_diff_emb_upstream.ipynb`.
 - `notebooks/coursework/01_sid_generation/`: improved RQ-VAE runs, SID
-  generation, and collision disambiguation.
+  generation, collision disambiguation, and upstream RQ-VAE training notebooks.
 - `notebooks/coursework/02_recsys/`: GPT2Rec training and evaluation over SID
   variants.
 - `notebooks/coursework/03_analysis/`: tie-break, multi-seed, Spearman, and
