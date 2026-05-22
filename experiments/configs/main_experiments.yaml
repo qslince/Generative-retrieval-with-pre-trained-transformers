@@ -1,0 +1,48 @@
+dataset:
+  data_path: "C:/Users/Admin/Documents/GitHub/claude_plum/data/heterodata_object12_updated.pt"
+  sequence_path: "C:/Users/Admin/Documents/GitHub/claude_plum/data/sequential_data.txt"
+  item_id_base: 1
+
+recsys:
+  model: "GPT2Rec"
+  max_hist_len: 20
+  d_model: 256
+  n_heads: 8
+  n_layers: 4
+  dropout: 0.1
+  batch_size: 256
+  lr: 0.001
+  warmup_steps: 500
+  beam_size: 32
+  eval_ks: [1, 5, 10, 20]
+
+experiments:
+  - name: "baseline_3code_count"
+    rqvae_source: "PLUM_implementation/data/best_rqvae.pth"
+    sid_method: "count_suffix"
+    n_layers: 3
+
+  - name: "improved_4code_count_suffix"
+    rqvae_source: "claude_plum/data/checkpoints_improved/rqvae_improved_s5.pt"
+    sid_method: "count_suffix"
+    n_layers: 4
+
+  - name: "improved_4code_no_suffix_popular"
+    rqvae_source: "claude_plum/data/checkpoints_improved/rqvae_improved_s5.pt"
+    sid_method: "no_suffix_popular_fallback"
+    n_layers: 4
+
+  - name: "improved_4code_popularity_suffix"
+    rqvae_source: "claude_plum/data/checkpoints_improved/rqvae_improved_s5.pt"
+    sid_method: "popularity_suffix"
+    n_layers: 4
+
+  - name: "improved_4code_centroid_suffix"
+    rqvae_source: "claude_plum/data/checkpoints_improved/rqvae_improved_s5.pt"
+    sid_method: "centroid_suffix"
+    n_layers: 4
+
+  - name: "improved_4code_semantic_suffix"
+    rqvae_source: "claude_plum/data/checkpoints_improved/rqvae_improved_s5.pt"
+    sid_method: "semantic_residual_suffix"
+    n_layers: 4

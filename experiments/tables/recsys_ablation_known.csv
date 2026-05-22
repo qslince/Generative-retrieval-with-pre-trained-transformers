@@ -1,0 +1,8 @@
+experiment_name;sid_method;Recall@1;Recall@5;Recall@10;Recall@20;NDCG@1;NDCG@5;NDCG@10;NDCG@20;val_loss_best;notes
+improved_4code_count_suffix;count_suffix;0,0056;0,0262;0,048;0,085;0,0056;0,0157;0,0227;0,032;1,5022;Existing A/B result from popularity_tiebreak_and_spearman
+improved_4code_popularity_suffix;popularity_suffix;0,0054;0,0259;0,0468;0,0847;0,0054;0,0155;0,0222;0,0317;1,502;Existing A/B result from popularity_tiebreak_and_spearman
+;;;;;;;;;;;
+New_exp;;;;;;;;;;;
+improved_4code_count_suffix;count;0,0068;0,0266;0,0485;0,086;0,0068;0,0165;0,0235;0,0329;1,3154;
+improved_4code_centroid_suffix;centroid;0,0066;0,0261;0,0475;0,0852;0,0066;0,0162;0,023;0,0325;1,3139;
+improved_4code_semantic_suffix;semantic;0,0064;0,0262;0,0482;0,0858;0,0064;0,0163;0,0234;0,0328;1,3159;

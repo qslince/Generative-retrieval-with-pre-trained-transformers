@@ -1,7 +1,8 @@
 # Results
 
-This directory contains report-ready artifacts copied from the local coursework
-result set.
+This directory contains the most compact report-ready artifacts copied from the
+local coursework result set. The broader experiment export is available under
+`experiments/`.
 
 ## Tables
 

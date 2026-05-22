@@ -13,7 +13,9 @@ easy to review.
 
 ## Working With Notebooks
 
-- Keep notebooks in `notebooks/` and run Jupyter from the repository root.
+- Keep original upstream notebooks in `notebooks/original/`.
+- Keep expanded coursework notebooks in `notebooks/coursework/`.
+- Run Jupyter from the repository root.
 - Keep exploratory changes in clearly named cells.
 - Avoid committing generated checkpoints, plots, or temporary outputs.
 - Clear large notebook outputs before committing unless the output is necessary
@@ -25,7 +27,8 @@ easy to review.
 
 The tracked `data/` files are part of the project input state. Generated
 artifacts such as RQ-VAE checkpoints, GPT checkpoints, and result plots should
-stay out of git unless they are intentionally curated under `results/`.
+stay out of git unless they are intentionally curated under `results/` or
+`experiments/`.
 
 ## Checks Before Commit
 

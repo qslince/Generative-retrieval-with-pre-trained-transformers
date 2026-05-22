@@ -1,0 +1,1 @@
+experiment_name,sid_method,rqvae_checkpoint,n_layers,codebook_size,use_suffix,collision_strategy,entropy_mean,entropy_min,unique_total_base,n_collisions,max_dupe,cfr,pas_emb,pas_behavioral,zipf_alpha_full,Recall@1,Recall@5,Recall@10,Recall@20,NDCG@1,NDCG@5,NDCG@10,NDCG@20,val_loss_best,seed,notes

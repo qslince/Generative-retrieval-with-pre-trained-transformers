@@ -12,7 +12,8 @@ variants, and uses a GPT-style sequence model for recommendation analysis.
 
 The project is intentionally kept close to the original exploratory notebooks.
 The repository is organized so that the data, notebooks, and report-ready
-results are easy to inspect without changing the experimental logic.
+results are easy to inspect without changing the experimental logic. It also
+includes the expanded coursework notebook set from `plum_sid_coursework`.
 
 ## Repository Status
 
@@ -36,11 +37,15 @@ results are easy to inspect without changing the experimental logic.
 |   +-- meta.json.gz                # Compressed item metadata
 |   `-- sequential_data.txt         # User interaction sequences
 +-- notebooks/
-|   +-- data_prep_diff_emb.ipynb   # Data preparation and embedding workflow
-|   +-- RQVAE_train_stage.ipynb    # Contrastive RQ-VAE training workflow
-|   +-- RQVAE_AntiContrastive_train.ipynb
-|   |                               # Anti-contrastive RQ-VAE variant
-|   `-- GPT2_Rec_Analysis.ipynb    # GPT-style recommendation analysis
+|   +-- original/                  # Four notebooks from the upstream repo
+|   `-- coursework/                # Expanded coursework notebook pipeline
++-- src/
+|   `-- sid_utils.py               # Reusable SID assignment/metric helpers
++-- docs/                          # Protocol, metric guide, file map, plan
++-- experiments/
+|   +-- configs/                   # Experiment configuration notes
+|   +-- figures/                   # Coursework experiment figures
+|   `-- tables/                    # Coursework experiment CSV outputs
 +-- results/
 |   +-- figures/                   # Report figures
 |   `-- tables/                    # Final CSV summaries and paired tests
@@ -88,6 +93,9 @@ resolve consistently.
 If your Jupyter kernel starts inside `notebooks/`, run `%cd ..` in a setup cell
 or adjust the data paths before executing the workflow.
 
+Some coursework notebooks import `sid_utils`; if needed, add `src/` to
+`PYTHONPATH` or run them from the repository root with `sys.path.append("src")`.
+
 ## Data
 
 The tracked `data/` directory contains the files required by the preparation
@@ -102,31 +110,58 @@ The training notebooks currently refer to `heterodata_object12_updated.pt` in
 their original Kaggle/local paths. When running locally, either update
 `DATA_PATH` to point at `data/heterodata_object.pt` if that artifact is suitable
 for your run, or regenerate the updated artifact from
-`notebooks/data_prep_diff_emb.ipynb` and place it where the training notebooks
-expect it.
+`notebooks/original/data_prep_diff_emb.ipynb` or
+`notebooks/coursework/00_baseline/data_prep_diff_emb.ipynb` and place it where
+the training notebooks expect it.
 
-## Usage
+## Notebook Collections
 
-Run the notebooks in the following order for the full workflow:
+There are two notebook collections:
 
-1. `notebooks/data_prep_diff_emb.ipynb`
+- `notebooks/original/`: the four notebooks from the upstream repository,
+  preserved as the compact original workflow.
+- `notebooks/coursework/`: the expanded coursework workflow copied from
+  `plum_sid_coursework`, grouped into baseline preparation, SID generation,
+  RecSys training, and analysis.
+
+The original workflow is:
+
+1. `notebooks/original/data_prep_diff_emb.ipynb`
    - Loads the sequential data, metadata, and id maps.
    - Builds item-side representations and a heterogeneous data object.
    - Saves a prepared `.pt` artifact for model training.
 
-2. `notebooks/RQVAE_train_stage.ipynb`
+2. `notebooks/original/RQVAE_train_stage.ipynb`
    - Trains the main RQ-VAE semantic-id model.
    - Saves checkpoints named like `rqvae_improved_s{session}.pt`.
 
-3. `notebooks/RQVAE_AntiContrastive_train.ipynb`
+3. `notebooks/original/RQVAE_AntiContrastive_train.ipynb`
    - Trains the anti-contrastive RQ-VAE variant.
    - Saves checkpoints named like `rqvae_anti_s{session}.pt`.
 
-4. `notebooks/GPT2_Rec_Analysis.ipynb`
+4. `notebooks/original/GPT2_Rec_Analysis.ipynb`
    - Loads trained RQ-VAE checkpoints.
    - Assigns semantic ids to items.
    - Trains/evaluates a GPT-style sequential recommendation model.
    - Saves GPT recommendation checkpoints and plots when configured.
+
+The expanded coursework workflow is:
+
+1. `notebooks/coursework/00_baseline/`
+   - Data preparation and original PLUM/RQ-VAE/GPT2 baselines.
+2. `notebooks/coursework/01_sid_generation/`
+   - Improved RQ-VAE training, 3-level/4-level SID variants, longitudinal
+     checkpoints, and collision disambiguation notebooks.
+3. `notebooks/coursework/02_recsys/`
+   - GPT2Rec training and evaluation over generated SID variants.
+4. `notebooks/coursework/03_analysis/`
+   - Tie-break analysis, multi-seed summaries, Spearman correlations, and
+     final report tables.
+
+`notebooks/original/GPT2_Rec_Analysis.ipynb` is identical to
+`notebooks/coursework/00_baseline/plum_original_GPT2_analysis.ipynb`; both are
+kept so the original repository workflow and coursework workflow remain
+traceable.
 
 ## Results Summary
 
@@ -153,6 +188,9 @@ Source tables:
 
 - `results/tables/table_rqvae_summary_by_loss.csv`
 - `results/tables/table_rqvae_paired_stat_test.csv`
+- `experiments/tables/final_table.csv`
+- `experiments/tables/tiebreak_result_l3.csv`
+- `experiments/tables/tiebreak_result_l4.csv`
 
 ### GPT2Rec Downstream Quality
 
@@ -188,6 +226,10 @@ Source tables:
 
 ![Identifier/recommendation correlation heatmap](results/figures/checkpoint_sid_recsys_corr_heatmap.png)
 
+The broader, less-curated experiment export is kept in `experiments/`. Use
+`results/` for the compact report-ready view and `experiments/` when you need
+the full coursework trace.
+
 ## Training and Evaluation
 
 Training hyperparameters such as batch size, number of epochs, learning rate,
@@ -212,7 +254,7 @@ checks after edits, validate that the notebooks are readable JSON and that the
 documented dependency list still matches notebook imports.
 
 ```bash
-jupyter nbconvert --to notebook --execute notebooks/RQVAE_train_stage.ipynb --ExecutePreprocessor.cwd=.
+jupyter nbconvert --to notebook --execute notebooks/original/RQVAE_train_stage.ipynb --ExecutePreprocessor.cwd=.
 ```
 
 The command above executes a full notebook and may be slow or require a GPU and
@@ -232,7 +274,9 @@ Core libraries used by the notebooks include:
 - PyTorch
 - PyTorch Geometric
 - Sentence-Transformers
+- Transformers
 - Gensim
+- SciPy / scikit-learn
 - Jupyter
 
 ## License
