@@ -1,0 +1,2 @@
+metric,n_pairs,contrastive_mean,anti_mean,mean_delta,bootstrap_ci_low,bootstrap_ci_high,contrastive_wins,anti_wins,ties,sign_test_p_greater,wilcoxon_p_greater
+Independent Code Rate,10,0.9622097347326667,0.7117428311709776,0.2504669035616891,0.20084269895049991,0.3042990248739772,10,0,0,0.0009765625,0.0009765625
