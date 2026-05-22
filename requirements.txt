@@ -1,0 +1,10 @@
+jupyterlab>=4.0
+ipykernel>=6.0
+numpy>=1.26
+pandas>=2.0
+matplotlib>=3.8
+tqdm>=4.66
+torch>=2.2
+torch-geometric>=2.5
+sentence-transformers>=2.7
+gensim>=4.3

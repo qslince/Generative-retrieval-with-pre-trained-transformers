@@ -1,0 +1,41 @@
+# Python caches and local environments
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+.env
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Tooling and editor state
+.vscode/
+.idea/
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+
+# Logs and temporary files
+*.log
+tmp/
+temp/
+
+# ML experiment outputs
+checkpoints*/
+runs/
+outputs/
+wandb/
+*.ckpt
+*.pth
+gpt2rec_*.pt
+rqvae_improved_s*.pt
+rqvae_anti_s*.pt
+heterodata_object12_updated.pt
+rqvae_improved_training.png
+gpt2rec_results.png
+
+# OS files
+.DS_Store
+Thumbs.db
