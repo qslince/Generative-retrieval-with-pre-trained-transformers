@@ -207,6 +207,65 @@ The broader, less-curated experiment export is kept in `experiments/`. Use
 `results/` for the compact report-ready view and `experiments/` when you need
 the full coursework trace.
 
+## Experiment Warehouse (S3 + Athena)
+
+Experiment results are also published as a small relational warehouse: Parquet
+datasets in S3, registered in the AWS Glue catalog under the `genret` database
+and queried with Athena. The motivation is practical — the flat CSV exports put
+hyperparameters, tokenizer metrics and recommendation metrics in the same row,
+so every new comparison meant another pandas script. Normalized, a new
+comparison is a new query.
+
+Four tables, each partitioned by `experiment`:
+
+| Table | Rows | Grain |
+| --- | --- | --- |
+| `rqvae_runs` | 44 | one RQ-VAE run, with its configuration |
+| `rqvae_metrics` | 490 | long format: run, metric, level, value |
+| `gpt2_runs` | 230 | one GPT2Rec run, with its configuration |
+| `gpt2_metrics` | 3222 | long format: run, split, metric, k, value |
+
+The `experiment` partition exists because the three source families have
+different units of observation and must not be averaged together:
+
+- `sweep` — checkpoint and tie-break sweep, one GPT2Rec run per configuration;
+  the GPT2 seed is not varied, so `gpt_seed` is NULL.
+- `paired` — paired contrastive / anti-contrastive comparison, 10 RQ-VAE seeds
+  by 3 GPT2 seeds.
+- `longitudinal` — 18 RQ-VAE training checkpoints by 3 tie-break variants by
+  3 GPT2 seeds. This family has no loss arm, so `loss_type` is NULL.
+
+Metrics are stored long rather than wide because the families do not report the
+same metric sets — `@1` appears only in the sweep, `MRR` only in the paired
+runs — and as columns those would be NULL by construction.
+
+### Verified against the original analysis
+
+`src/verify_sql.py` recomputes three published results in Athena and asserts
+them against the original pandas figures:
+
+| Result | Value |
+| --- | --- |
+| Paired ICR gain, contrastive over anti-contrastive | 0.250466904 |
+| Mean valid NDCG@10, paired, anti / contrastive | 0.001337876 / 0.006503108 |
+| Spearman(mean code entropy, test Recall@20), n = 53 | 0.830915026 |
+
+All three agree to nine decimal places. The Spearman query is the one that
+justifies the schema: it joins `rqvae_metrics` to `gpt2_metrics` through the
+checkpoint, averages over the three GPT2 seeds, and computes rank correlation
+with window functions — `rank()` plus a tie-size correction, because Athena
+returns minimum ranks where Spearman needs average ranks.
+
+```bash
+python src/upload_s3_rqvae.py --dry-run   # print the schema, write nothing
+python src/upload_s3_rqvae.py             # publish both RQ-VAE tables
+python src/upload_s3_gpt2.py              # publish both GPT2Rec tables
+python src/verify_sql.py                  # SQL vs pandas, non-zero exit on drift
+```
+
+The bucket name is read from `bucket_name` in a local `.env` file, which is
+gitignored.
+
 ## Training and Evaluation
 
 Training hyperparameters such as batch size, number of epochs, learning rate,
