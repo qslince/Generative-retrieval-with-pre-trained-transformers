@@ -1,7 +1,6 @@
 # Results
 
-This directory contains the most compact report-ready artifacts copied from the
-local coursework result set. The broader experiment export is available under
+This directory contains compact verstion of final artifacts from experiements. The broader experiment export is available under
 `experiments/`.
 
 ## Tables
@@ -28,5 +27,3 @@ local coursework result set. The broader experiment export is available under
 - `figures/spearman_all_ties_heatmap.png`: Spearman correlation overview from
   the broader tie-breaking analysis.
 
-These artifacts document the completed experimental work; generated checkpoints
-and temporary outputs remain ignored by git.

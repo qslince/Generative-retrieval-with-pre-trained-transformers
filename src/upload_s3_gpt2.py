@@ -92,7 +92,6 @@ def build_longitudinal():
 
     runs = pd.DataFrame({
         'experiment': 'longitudinal',
-        # продольный срез одного обучения, ветки anti/contrastive тут нет
         'loss_type': pd.NA,
         'rq_seed': df['rqvae_seed'].astype('Int64'),
         'gpt_seed': df['gpt2_seed'].astype('Int64'),
@@ -113,7 +112,6 @@ def build_longitudinal():
                .join(runs[['run_id', 'experiment', 'loss_type']])
                .melt(id_vars=['run_id', 'experiment', 'loss_type'],
                      var_name='name', value_name='value'))
-    # здесь, в отличие от final_table, split задан явно префиксом колонки
     parts = metrics['name'].str.extract(r'^(val|test)_((?:Recall|NDCG)@\d+)$')
     metrics['split'] = parts[0]
     metrics['name'] = parts[1].where(parts[1].notna(), metrics['name'])
@@ -133,11 +131,11 @@ def main(dry_run):
     metrics['k'] = metrics['k'].astype('Int64')
     metrics = metrics[METRIC_COLS]
 
-    assert runs['run_id'].is_unique, 'run_id не уникален'
+    assert runs['run_id'].is_unique, 'run_id is not unique'
 
-    print(f'gpt2_runs:    {len(runs)} строк ('
+    print(f'gpt2_runs:{len(runs)}  ('
           + ' / '.join(f'{n} {e}' for e, n in runs['experiment'].value_counts().items()) + ')')
-    print(f'gpt2_metrics: {len(metrics)} строк, метрики: '
+    print(f'gpt2_metrics: {len(metrics)}, metrics: '
           f'{sorted(metrics["metric"].unique())}')
 
     if dry_run:
@@ -160,7 +158,7 @@ def main(dry_run):
             partition_cols=['experiment'],
             mode='overwrite',
         )
-        print(f'записано: {table}')
+        print(f'Written: {table}')
 
 
 if __name__ == '__main__':

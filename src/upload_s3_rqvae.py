@@ -27,8 +27,6 @@ RQVAE_METRICS = ['entropy_mean', 'entropy_min', 'entropy_l0', 'entropy_l1',
                  'max_dupe', 'cfr', 'pas_emb', 'pas_behavioral', 'cur_total',
                  'zipf_alpha_full']
 
-# в merged-таблице метрики RQ-VAE названы иначе; приводим к именам из final_table,
-# чтобы одна и та же метрика сравнивалась между экспериментами
 LONG_METRIC_RENAMES = {
     'rq_val_entropy_mean': 'entropy_mean', 'rq_val_entropy_min': 'entropy_min',
     'rq_val_entropy_l0': 'entropy_l0', 'rq_val_entropy_l1': 'entropy_l1',
@@ -39,7 +37,6 @@ LONG_METRIC_RENAMES = {
     'sid_icr': 'ICR', 'sid_cur_total': 'cur_total',
 }
 
-# имена, для которых точного соответствия в final_table нет — оставляем как есть
 LONG_METRIC_KEEP = ['sid_max_cluster_size', 'sid_path_avg_similarity',
                     'rqvae_val_loss', 'rqvae_best_val_loss', 'rq_val_loss']
 
@@ -108,7 +105,6 @@ def build_longitudinal():
 
     df = df.assign(checkpoint='l4_seed' + df['rqvae_seed'].astype(str) + '_'
                               + df['checkpoint_tag'] + '_ep' + df['rqvae_epoch'].astype(str))
-    # 159 строк merged = прогоны GPT2Rec; токенизаторов среди них 18
     df = df.drop_duplicates('checkpoint').reset_index(drop=True)
 
     runs = pd.DataFrame({

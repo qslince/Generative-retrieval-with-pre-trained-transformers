@@ -1,12 +1,3 @@
-"""Сверка SQL-анализа в Athena с исходными расчётами на pandas.
-
-Каждая проверка считает одно и то же число двумя путями — запросом к таблицам в S3
-и напрямую по CSV — и падает, если они разошлись. Так проверяется и корректность
-схемы (ничего не потеряно при нормализации), и корректность самих запросов.
-
-  .venv/bin/python src/verify_sql.py
-"""
-
 import os
 from pathlib import Path
 
@@ -28,7 +19,6 @@ def athena(sql):
 
 
 def spearman(df, a, b):
-    """Ранговая корреляция средними рангами — тот же метод, что в SQL-запросе."""
     r = df[[a, b]].rank(method='average')
     return r[a].corr(r[b])
 
@@ -40,11 +30,10 @@ def check(name, got, want):
 
 
 def check_icr_delta():
-    """Парное улучшение Independent Code Rate: contrastive против anti_contrastive."""
     sql = athena("""
         WITH arms AS (
           SELECT r.rq_seed,
-                 max(m.value) FILTER (WHERE r.loss_type = 'contrastive')      AS contrastive,
+                 max(m.value) FILTER (WHERE r.loss_type = 'contrastive') AS contrastive,
                  max(m.value) FILTER (WHERE r.loss_type = 'anti_contrastive') AS anti
           FROM rqvae_runs r JOIN rqvae_metrics m ON m.run_id = r.run_id
           WHERE r.experiment = 'paired' AND m.metric = 'ICR'
@@ -58,7 +47,6 @@ def check_icr_delta():
 
 
 def check_gpt2_ndcg10():
-    """Средний NDCG@10 по вариантам лосса в парном эксперименте GPT2Rec."""
     sql = athena("""
         SELECT loss_type, avg(value) AS mean_value
         FROM gpt2_metrics
@@ -74,7 +62,6 @@ def check_gpt2_ndcg10():
 
 
 def check_entropy_recall_corr():
-    """Spearman между энтропией кодов и test_Recall@20 по продольным чекпоинтам."""
     sql = athena("""
         WITH gpt AS (
           SELECT g.checkpoint, g.tie_break, avg(m.value) AS score
@@ -102,12 +89,11 @@ def check_entropy_recall_corr():
     """)
 
     merged = pd.read_csv(ROOT / 'experiments' / 'tables' / 'checkpoint_sid_recsys_merged.csv')
-    # оригинал усредняет по трём сидам GPT2, единица наблюдения — (чекпоинт, tiebreak)
     g = (merged.groupby(['rqvae_seed', 'checkpoint_tag', 'rqvae_epoch', 'tiebreak'], dropna=False)
          [['rq_val_entropy_mean', 'test_Recall@20']].mean().dropna())
 
     n_ok = int(sql['n'][0]) == len(g)
-    print(f'{"OK  " if n_ok else "FAIL"}  размер выборки: SQL {sql["n"][0]}  pandas {len(g)}')
+    print(f'{"OK" if n_ok else "FAIL"}  size: SQL {sql["n"][0]}  pandas {len(g)}')
     corr_ok = check('Spearman(entropy_mean, test_Recall@20) (longitudinal)',
                     sql['spearman'][0], spearman(g, 'rq_val_entropy_mean', 'test_Recall@20'))
     return n_ok and corr_ok
@@ -118,9 +104,9 @@ def main():
     results = [fn() for fn in checks]
     print()
     if all(results):
-        print(f'все сверки пройдены ({len(results)} из {len(results)})')
+        print(f'All tests were successful ({len(results)} from {len(results)})')
     else:
-        raise SystemExit(f'расхождений: {results.count(False)} из {len(results)}')
+        raise SystemExit(f'Incorrect: {results.count(False)} из {len(results)}')
 
 
 if __name__ == '__main__':

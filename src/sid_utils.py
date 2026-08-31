@@ -1,10 +1,8 @@
 """SID assignment + metrics + Spearman analysis.
 
-Two pieces of new logic:
   1. assign_sids(..., tie_break='popularity'): when multiple items collide on
      base SID (c1..cL), the most popular one gets cnt=0. GPT2 tends to predict
-     cnt=0 (it is by far the most common suffix in training), so this routes
-     the "default" mass to the popular item -- expected to help Recall@1.
+     cnt=0, so this routes the "default" mass to the popular item -- expected to help Recall@1.
   2. compute_sid_metrics: a single call that returns the full vector of SID
      descriptors for a given (rqvae, embeds, popularity, sequences). Use these
      across many checkpoints to build a Spearman table against Recall/NDCG.
@@ -19,8 +17,7 @@ import torch
 import torch.nn.functional as F
 
 
-# ---------------------------------------------------------------------------
-# Popularity & sequences
+# Popularity and sequences
 
 def load_sequences(path: str) -> List[List[int]]:
     """Read sequential_data.txt: 'user_id item1 item2 ...' per line."""
@@ -35,12 +32,7 @@ def load_sequences(path: str) -> List[List[int]]:
 
 
 def compute_item_popularity(sequences: Sequence[Sequence[int]], n_items: int) -> np.ndarray:
-    """Item-frequency vector. Index is internal item id (0..n_items-1).
-
-    NOTE: sequential_data.txt uses 1-based item ids in this project, so we
-    subtract 1 here. If your file is already 0-based, pass `sequences` after
-    your own normalization.
-    """
+    """Item-frequency vector. Index is internal item id (0..n_items-1)."""
     pop = np.zeros(n_items, dtype=np.int64)
     for seq in sequences:
         for it in seq:
@@ -50,20 +42,18 @@ def compute_item_popularity(sequences: Sequence[Sequence[int]], n_items: int) ->
     return pop
 
 
-# ---------------------------------------------------------------------------
 # SID assignment
 
 @torch.no_grad()
 def encode_base_sids(rqvae, embeds: torch.Tensor, device: str, batch_size: int = 1024
                      ) -> List[Tuple[int, ...]]:
-    """Run RQ-VAE encoder over all items, return tuple SID per item (length = n_layers)."""
+    """Run RQ-VAE encoder over all items, return tuple SID per item """
     rqvae.eval()
     n = embeds.shape[0]
     base = [None] * n
     for start in range(0, n, batch_size):
         end = min(start + batch_size, n)
         out = rqvae(embeds[start:end].to(device))
-        # out['sids'] is a list of length n_layers, each tensor (B,)
         codes = torch.stack(out['sids'], dim=1).cpu().tolist()  # B x L
         for i, c in zip(range(start, end), codes):
             base[i] = tuple(c)
@@ -78,7 +68,7 @@ def assign_sids(base: List[Tuple[int, ...]], tie_break: str = 'count',
     """Append disambiguation suffix to colliding base SIDs.
 
     tie_break:
-      'count'      -> first-come first-served (the existing behaviour)
+      'count'      -> first-come first-served
       'popularity' -> most popular item in cluster gets cnt=0, rest by descending popularity
       'centroid'   -> closest item to cluster centroid (in `latents` space) gets cnt=0,
                       others ordered by ascending distance
@@ -138,8 +128,7 @@ def assign_sids(base: List[Tuple[int, ...]], tie_break: str = 'count',
     return full, sid_to_item, max_dupe
 
 
-# ---------------------------------------------------------------------------
-# Latent extraction & semantic disambig
+# Latent extraction and semantic disambig
 
 @torch.no_grad()
 def encode_latents_and_residuals(rqvae, embeds: torch.Tensor, device: str,
@@ -147,9 +136,8 @@ def encode_latents_and_residuals(rqvae, embeds: torch.Tensor, device: str,
                                  ) -> Tuple[torch.Tensor, torch.Tensor]:
     """Run encoder, return (z, residual) for each item.
 
-    z          -- normalized encoder output (used for centroid tie-break)
-    residual   -- z minus the sum of all quantized layers (the part NOT captured
-                  by the L codebooks; this is what we cluster for semantic disambig)
+    z - normalized encoder output (used for centroid tie-break)
+    residual - z minus the sum of all quantized layers
     """
     rqvae.eval()
     n = embeds.shape[0]
@@ -163,7 +151,8 @@ def encode_latents_and_residuals(rqvae, embeds: torch.Tensor, device: str,
         for cb in rqvae.codebooks:
             _, emb_st, _ = cb(r)
             r = r - emb_st.detach()
-        Zs.append(z.cpu()); Rs.append(r.cpu())
+        Zs.append(z.cpu())
+        Rs.append(r.cpu())
     return torch.cat(Zs, 0), torch.cat(Rs, 0)
 
 
@@ -172,9 +161,9 @@ def kmeans_residual_codes(residuals: torch.Tensor, k: int,
                           n_iter: int = 25, seed: int = 0) -> List[int]:
     """Global k-means over residual vectors of items that collide with someone.
 
-    Items that have a unique base SID get code 0 (no need to disambiguate).
+    Items that have a unique base SID get code 0.
     Items in any collision cluster get a code in [0, k-1] from the global
-    residual k-means -- so 'cnt=k' carries comparable meaning across clusters.
+    residual k-means so 'cnt=k' carries comparable meaning across clusters.
     """
     rng = np.random.RandomState(seed)
     R = residuals.cpu().numpy().astype(np.float64)
@@ -197,7 +186,8 @@ def kmeans_residual_codes(residuals: torch.Tensor, k: int,
             else:
                 new_C[j] = C[j]
         if np.allclose(new_C, C, atol=1e-6):
-            C = new_C; break
+            C = new_C
+            break
         C = new_C
     d = 1.0 - X @ C.T
     a = d.argmin(axis=1)
@@ -223,7 +213,6 @@ def build_trie(sid_to_item: Dict[Tuple[int, ...], List[int]]) -> dict:
     return trie
 
 
-# ---------------------------------------------------------------------------
 # SID metrics
 
 def per_level_entropy(base: List[Tuple[int, ...]], codebook_size: int) -> np.ndarray:
@@ -307,7 +296,7 @@ def behavioral_pas(base: List[Tuple[int, ...]], sequences: Sequence[Sequence[int
 
 
 def zipf_alpha(base: List[Tuple[int, ...]]) -> float:
-    """Slope of log-rank vs log-frequency for full SIDs. ~1 = canonical Zipf.
+    """Slope of log-rank vs log-frequency for full SIDs.
 
     Very flat (<0.5) = noisy, low signal. Very steep (>1.5) = collapse.
     """
@@ -358,7 +347,6 @@ def compute_sid_metrics(rqvae, embeds: torch.Tensor, device: str,
     return out
 
 
-# ---------------------------------------------------------------------------
 # Spearman correlation table
 
 def spearman_table(metric_rows: List[Dict[str, float]],
