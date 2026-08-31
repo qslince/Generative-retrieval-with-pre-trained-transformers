@@ -1,10 +1,4 @@
-# Notebooks
-
-Run notebooks from the repository root so relative paths like `data/`, `src/`,
-and `experiments/` resolve consistently. If a Jupyter kernel starts inside this
-directory, run `%cd ..` before executing path-sensitive cells.
-
-## Coursework Workflow
+## Workflow
 
 1. `coursework/00_baseline/`: data preparation and original baselines.
 2. `coursework/01_sid_generation/`: RQ-VAE training, SID generation, and

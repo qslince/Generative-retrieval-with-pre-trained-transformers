@@ -5,27 +5,10 @@
 ![PyTorch](https://img.shields.io/badge/framework-PyTorch-ee4c2c.svg)
 ![License](https://img.shields.io/badge/license-not%20specified-lightgrey.svg)
 
-This repository contains a notebook-based research project for generative
+This repository contains a research project for generative
 retrieval in sequential recommendation. The workflow builds item
 representations, learns residual-quantized semantic identifiers with RQ-VAE
 variants, and uses a GPT-style sequence model for recommendation analysis.
-
-The project is intentionally kept close to the original exploratory notebooks.
-The repository is organized so that the data, notebooks, and report-ready
-results are easy to inspect without changing the experimental logic. It also
-includes the expanded coursework notebook set from `plum_sid_coursework`.
-
-## Repository Status
-
-- The project is organized around Jupyter notebooks rather than command-line
-  training scripts.
-- The repository includes prepared data artifacts in `data/`.
-- Some notebooks still contain environment-specific paths from the original
-  working setup, including Kaggle paths and local Windows paths. Update the
-  `DATA_PATH`, checkpoint, and output directory variables inside the notebooks
-  before running them in a new environment.
-- No official experiment metrics or paper-ready results are claimed here beyond
-  what is already visible in the notebooks.
 
 ## Project Structure
 
@@ -33,7 +16,7 @@ includes the expanded coursework notebook set from `plum_sid_coursework`.
 .
 +-- data/
 |   +-- datamaps.json              # User/item/attribute id mappings
-|   +-- heterodata_object.pt        # Prepared PyTorch/PyG data object
+|   +-- heterodata_object.pt        # Prepared PyTorch data object
 |   +-- meta.json.gz                # Compressed item metadata
 |   `-- sequential_data.txt         # User interaction sequences
 +-- notebooks/
@@ -44,7 +27,7 @@ includes the expanded coursework notebook set from `plum_sid_coursework`.
 |       `-- 03_analysis/           # Experiment analysis notebooks
 +-- src/
 |   `-- sid_utils.py               # Reusable SID assignment/metric helpers
-+-- docs/                          # Protocol, metric guide, file map, plan
++-- docs/                          # Protocol, metric guide, file map
 +-- experiments/
 |   +-- configs/                   # Experiment configuration notes
 |   +-- figures/                   # Coursework experiment figures
@@ -106,26 +89,16 @@ and modeling notebooks:
 
 - `sequential_data.txt`: integer item sequences per user.
 - `datamaps.json`: mappings between original ids and internal numeric ids.
-- `meta.json.gz`: compressed item metadata used during feature construction.
+- `meta.json.gz`: item metadata used during feature construction.
 - `heterodata_object.pt`: serialized PyTorch/PyG object for downstream models.
 
-The training notebooks currently refer to `heterodata_object12_updated.pt` in
-their original Kaggle/local paths. When running locally, either update
-`DATA_PATH` to point at `data/heterodata_object.pt` if that artifact is suitable
-for your run, or regenerate the updated artifact from
-`notebooks/coursework/00_baseline/data_prep_diff_emb.ipynb` or
-`notebooks/coursework/00_baseline/data_prep_diff_emb_upstream.ipynb` and place
-it where the training notebooks expect it.
+## Workflow
 
-## Notebook Workflow
-
-All notebooks are kept under `notebooks/coursework/` so the repository has a
-single submission-oriented notebook layout. The tree combines the upstream
-notebooks and the expanded coursework experiments without splitting them into
-separate `original` and `coursework` collections.
+All notebooks are kept under `notebooks/coursework/`. The tree combines the upstream
+notebooks and the expanded coursework experiments.
 
 1. `notebooks/coursework/00_baseline/`
-   - Data preparation and PLUM/RQ-VAE/GPT2 baseline notebooks.
+   - Data preparation and baseline notebooks.
    - Includes the upstream data-preparation notebook as
      `data_prep_diff_emb_upstream.ipynb`.
 2. `notebooks/coursework/01_sid_generation/`
@@ -142,10 +115,7 @@ separate `original` and `coursework` collections.
 
 ## Results Summary
 
-The `results/` directory contains compact artifacts prepared from the local
-coursework/report runs. These values should be read as validation results for
-the documented experimental setup, not as benchmark claims for a new dataset or
-paper.
+The `results/` directory contains compact artifacts prepared from the local runs.
 
 ### RQ-VAE Semantic Identifier Quality
 
@@ -283,40 +253,3 @@ Expected generated artifacts include:
 These generated artifacts are ignored by `.gitignore` so that large experiment
 outputs are not accidentally committed.
 
-## Development Notes
-
-There are no standalone unit tests in the original repository. For lightweight
-checks after edits, validate that the notebooks are readable JSON and that the
-documented dependency list still matches notebook imports.
-
-```bash
-jupyter nbconvert --to notebook --execute notebooks/coursework/01_sid_generation/RQVAE_train_stage_upstream.ipynb --ExecutePreprocessor.cwd=.
-```
-
-The command above executes a full notebook and may be slow or require a GPU and
-correct local data paths. For documentation-only changes, JSON parsing of the
-notebooks is usually a safer smoke check.
-
-## Citation and References
-
-No canonical BibTeX entry or publication metadata was included in the upstream
-repository. If this project is submitted for coursework or publication, cite the
-course/project repository and add formal citations for the specific generative
-retrieval, RQ-VAE, transformer, dataset, and embedding-model references used in
-your report.
-
-Core libraries used by the notebooks include:
-
-- PyTorch
-- PyTorch Geometric
-- Sentence-Transformers
-- Transformers
-- Gensim
-- SciPy / scikit-learn
-- Jupyter
-
-## License
-
-The upstream repository did not include an explicit open-source license at the
-time of this cleanup. See `LICENSE` for the current license-status note. Choose
-and add a concrete license before redistributing this project as open source.
