@@ -29,13 +29,3 @@ Interpretation: if colliding items really are similar, the collision is less har
 - `cur_total` — the fraction of the code space actually used.
 
 Interpretation: an overly steep Zipf / collapse is usually harmful, but `cur_total` on its own can be uninformative when the code space is huge.
-
-## Relation to RecSys
-
-Compute:
-
-- Spearman correlation between each SID metric and `Recall@K` / `NDCG@K`;
-- correlations among the SID metrics themselves;
-- the overall analysis and the controlled ablation separately.
-
-Do not write "correlation proves causation" in the conclusions. The correct phrasing is: "the metric is a candidate proxy and requires a controlled ablation."
