@@ -1,41 +1,41 @@
-# SID-метрики и как их интерпретировать
+# SID metrics and how to interpret them
 
 ## Collision metrics
 
-- `n_collisions` - сколько item'ов не имеют уникального base SID.
-- `cfr` - collision-free ratio. Чем выше, тем больше item'ов имеют уникальный base SID.
-- `max_dupe` - максимальный размер collision cluster.
+- `n_collisions` — how many items lack a unique base SID.
+- `cfr` — collision-free ratio. The higher it is, the more items have a unique base SID.
+- `max_dupe` — the size of the largest collision cluster.
 
-Интерпретация: меньше коллизий обычно лучше, но слишком длинный SID может ухудшить autoregressive decoding.
+Interpretation: fewer collisions is usually better, but an overly long SID can degrade autoregressive decoding.
 
 ## Entropy metrics
 
-- `entropy_l0...entropy_lN` - насколько равномерно используются коды на каждом уровне.
-- `entropy_mean` - средняя энтропия уровней.
-- `entropy_min` - слабейший уровень. Если один уровень коллапсирует, он может ограничивать весь SID.
+- `entropy_l0...entropy_lN` — how uniformly the codes are used at each level.
+- `entropy_mean` — mean entropy across levels.
+- `entropy_min` — the weakest level. If one level collapses, it can bottleneck the whole SID.
 
-Интерпретация: высокая entropy полезна, если она не является случайным шумом.
+Interpretation: high entropy is useful as long as it is not just random noise.
 
 ## Similarity metrics
 
-- `pas_emb` - средняя cosine similarity item embeddings внутри collision clusters.
-- `pas_behavioral` - средняя похожесть по множествам пользователей.
+- `pas_emb` — mean cosine similarity of item embeddings within collision clusters.
+- `pas_behavioral` — mean similarity in terms of user sets.
 
-Интерпретация: если collision items реально похожи, коллизия менее вредна для RecSys.
+Interpretation: if colliding items really are similar, the collision is less harmful for RecSys.
 
 ## Distribution metrics
 
-- `zipf_alpha_full` - форма распределения частот SID.
-- `cur_total` - доля использованного пространства кодов.
+- `zipf_alpha_full` — the shape of the SID frequency distribution.
+- `cur_total` — the fraction of the code space actually used.
 
-Интерпретация: слишком сильный Zipf/collapse обычно вреден, но `cur_total` сам по себе может быть малоинформативен при огромном пространстве кодов.
+Interpretation: an overly steep Zipf / collapse is usually harmful, but `cur_total` on its own can be uninformative when the code space is huge.
 
-## Связь с RecSys
+## Relation to RecSys
 
-Считать:
+Compute:
 
-- Spearman между каждой SID-метрикой и `Recall@K`/`NDCG@K`;
-- корреляции между самими SID-метриками;
-- отдельно общий анализ и controlled ablation.
+- Spearman correlation between each SID metric and `Recall@K` / `NDCG@K`;
+- correlations among the SID metrics themselves;
+- the overall analysis and the controlled ablation separately.
 
-В выводах не писать "корреляция доказывает причинность". Правильная формулировка: "метрика является прокси-кандидатом и требует controlled ablation".
+Do not write "correlation proves causation" in the conclusions. The correct phrasing is: "the metric is a candidate proxy and requires a controlled ablation."
